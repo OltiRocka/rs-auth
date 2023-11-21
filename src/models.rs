@@ -20,5 +20,5 @@ pub struct NewUser {
 #[derive(Deserialize)]
 pub struct LoginRequest {
     pub username: String,
-    pub password: String, // Note: this is plaintext password
+    pub password: String,
 }

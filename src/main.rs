@@ -10,5 +10,5 @@ mod models;
 fn rocket() -> _ {
     rocket::build()
         .attach(db::init_pool())
-        .mount("/", routes::get_routes())
+        .mount("/auth", routes::get_routes())
 }

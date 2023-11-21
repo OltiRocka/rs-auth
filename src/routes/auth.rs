@@ -13,7 +13,6 @@ use crate::models::{NewUser, User, LoginRequest};
 pub async fn register(new_user: Json<NewUser>, db_pool: &State<Pool>) -> Status {
     let mut conn = db_pool.get().expect("database connection failure");
 
-    // Check if user already exists
     let existing_user = users
         .filter(username.eq(&new_user.username))
         .first::<User>(&mut conn)
@@ -24,16 +23,13 @@ pub async fn register(new_user: Json<NewUser>, db_pool: &State<Pool>) -> Status 
         return Status::Conflict;
     }
 
-    // Hash the password
     let hashed_password  = hash(&new_user.password_hash, DEFAULT_COST).expect("Error hashing password");
 
-    // Create new user
     let new_user = NewUser {
         username: new_user.username.clone(),
         password_hash: hashed_password,
     };
 
-    // Insert new user into the database
     diesel::insert_into(users)
         .values(&new_user)
         .execute(&mut conn)
@@ -46,7 +42,6 @@ pub async fn register(new_user: Json<NewUser>, db_pool: &State<Pool>) -> Status 
 pub async fn login(login_request: Json<LoginRequest>, db_pool: &State<Pool>) -> Status {
     let mut conn = db_pool.get().expect("database connection failure");
 
-    // Find user by username
     let db_user = users
         .filter(username.eq(&login_request.username))
         .first::<User>(&mut conn)
@@ -55,7 +50,6 @@ pub async fn login(login_request: Json<LoginRequest>, db_pool: &State<Pool>) -> 
 
     match db_user {
         Some(user) => {
-            // Verify password
             if verify(&login_request.password, &user.password_hash).expect("Error verifying password") {
                 Status::Ok
             } else {
